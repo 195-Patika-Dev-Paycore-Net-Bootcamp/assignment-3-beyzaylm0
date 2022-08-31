@@ -142,19 +142,22 @@ namespace Assignment3.Controllers
         }
 
 
-        [HttpGet("{vehicleId}/numberOfClusters")] //method that groups containers by number of clusters
-        public List<List<Container>> ContainerGrouping(int vehicleId, int numberOfClusters)
+        [HttpGet("{vehicleId}/numberOfClusters")]
+        public ActionResult<List<List<Container>>> ContainerGrouping(long vehicleId, int n)
         {
-            var i = 0;
+            var vehicleIdContainerList = session.container.Where(v => v.vehicleid == vehicleId).ToList();
 
-            var container = session.container.Where(x => x.vehicleid == vehicleId).ToList();
-            var result =
-                   container.GroupBy(s => i++ / numberOfClusters).Select(g => g.ToList()).ToList();
+            var result = vehicleIdContainerList.Select(
+                    (value, index) => new
+                    {
+                        ClusterIndex = index % n,
+                        Value = value
+                    }).GroupBy(c => c.ClusterIndex, c => c.Value).ToList();
+                    
 
-            return result;
 
+            return Ok(result);
         }
-      
         }
     }
 
